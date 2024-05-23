@@ -105,6 +105,10 @@ class ArticleHandler(tornado.web.RequestHandler):
         self.set_header("Content-Type", 'application/json')
     def get(self):
         self.write(json.dumps(DS.Article.load_articles()))
+        print("A")
+    def _get(self):
+        self.write(json.dumps(DS.Article.load_article()))
+        print("B")
     def post(self):
         data = self.request.body
         DS.Article.insert(data)
@@ -133,6 +137,7 @@ settings = {
 
 application = tornado.web.Application([
     (r'/save-article', ArticleHandler),
+    (r'/load-articles', ArticleHandler),
     (r'/load-article', ArticleHandler),
     (r'/save-user',  UserHandler),
     (r'/login', LoginHandler),

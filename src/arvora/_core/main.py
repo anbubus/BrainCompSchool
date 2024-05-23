@@ -128,7 +128,7 @@ class LoginPage(SimplePage):
             if req.status==200:
                 print("complete ok: " + f'{req.status}')
                 if json.loads(req.text) == "ok":
-                    SimplePage.PAGES["_MAIN_"].show()
+                    self.brython.window.location.reload()
 
             else:
                 print("error detected: " + f'{req.status}')
@@ -148,10 +148,6 @@ class LoginPage(SimplePage):
         doc["email"].value = ""
         doc["password"].value = ""
         #verificando se os dados estão corretos
-
-
-
-
 
         data = {
             "email": email,
@@ -357,98 +353,10 @@ class ProjectPage(SimplePage):
 
         return sec
 
-users = [
-    {
-        "name": "Roberto",
-        "email": "roberto@mail",
-        "points": "100",
-        "id": "1",
-        "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-        "tags": "#mav",
-        "date": "2021-01-21"
-    },
-    {
-        "name": "Amanda",
-        "email": "amanda@mail",
-        "points": "72",
-        "id": "2",
-        "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-        "tags": "#mav",
-        "date": "2021-01-21"
-    },
-    {
-        "name": "Roberto",
-        "email": "roberto@mail",
-        "points": "100",
-        "id": "1",
-        "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-        "tags": "#mav",
-        "date": "2021-01-21"
-    },
-    {
-        "name": "Amanda",
-        "email": "amanda@mail",
-        "points": "72",
-        "id": "2",
-        "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-        "tags": "#mav",
-        "date": "2021-01-21"
-    },
-    {
-        "name": "Amanda",
-        "password": "1234",
-        "email": "amanda@mail",
-        "posts":[
-            {
-                "id": "1",
-                "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-                "tags": "#mav",
-                "date": "2021-01-21"
-            },
-        ]
-     },]
+
 
 
 class KnowledgePage(SimplePage):
-    # def refresh(ev):
-    #     def on_complete(req):
-    #         if req.status == 200:
-    #             text = req.text
-    #             try:
-    #                 drafts = json.loads(text)
-    #
-    #             except:
-    #                 drafts = [{"title": "Rascunho 1", "abstract": "resumo"},
-    #                           {"title": "Rascunho 2", "abstract": "resumo 2"},
-    #                           {"title": "Rascunho 3", "abstract": "resumo 3"}]
-    #             show(drafts)
-    #
-    #     req = ajax.Ajax()
-    #     req.bind('complete', on_complete)
-    #     req.open('GET', '/load-article', True)
-    #     req.set_header('content-type', 'application/json')
-    #     req.send()
-    #
-    # def show(drafts):
-    #     tor = []
-    #     # Loop que mostra as páginas de rascunho
-    #     for d in drafts:
-    #         print("u")
-    #
-    #         title = d.get("title")
-    #         body = d.get("body")
-    #
-    #         tit = h.P(title, Class='title is-4')
-    #         abst = h.P(body, Class='text is-6')
-    #         btnd = h.BUTTON("Deletar", Class="button is-danger is-rounded mt-5 is-responsive block is-fullwidth",
-    #                         type='submit')
-    #
-    #         # todos os rascunhos
-    #         tor.append(h.DIV((tit, abst, btnd), Class='box'))
-    #     wrp.clear()
-    #     wrp <= h.DIV((bt, tor), Class="column body-columns")
-    #
-    #     return wrp
 
     def __init__(self, brython, menu = MENU_OPTIONS):
         super().__init__(brython, menu, hero="main_hero")
@@ -458,15 +366,17 @@ class KnowledgePage(SimplePage):
             SimplePage.PAGES["_RASCUNHO_"].show()
         elif ev.target.id == "Writing":
             SimplePage.PAGES["_ESCREVER_"].show()
-    def show_article(ev):
-        SimplePage.PAGES["_ARTIGO_"].show()
+        elif ev.target.id== "Back":
+            pass
 
     def build_body(self):
         ajax = self.brython.ajax
         h = self.brython.html
 
         posts = h.P("Error")
+        posts.clear()
         def get_article():
+            print("Hello")
             def on_complete(req):
                 if req.status == 200:
                     text = req.text
@@ -484,7 +394,13 @@ class KnowledgePage(SimplePage):
             req.open('GET', '/load-article', True)
             req.set_header('content-type', 'application/json')
             req.send()
-
+        def show_article(ev):
+            article = ev.target
+            print(article)
+            if article.id== "card-box":
+                posts.clear()
+                posts <= article
+                return posts
         def show(articles):
             card = ""
             search_bar = h.FORM(h.DIV(
@@ -511,19 +427,22 @@ class KnowledgePage(SimplePage):
                     h.BUTTON("Perguntar", Class="button is-info"),
                     h.BUTTON("Artigos Filhos", Class="button")), Class="card-footer")
 
-                card += h.DIV((card_img, card_content, card_buttons), Class="box").bind("click", self.show_article)
+                card += h.DIV((card_img, card_content, card_buttons),Id="card-box", Class="box").bind("click", show_article)
             post = h.DIV((search_bar, card), Class="column is-half is-offset-one-quarter ")
             posts.clear()
             posts <= h.DIV(post, Class="columns body-columns")
             return posts
 
         get_article()
-
+        def back(ev):
+            get_article()
         btn1 = h.BUTTON("Rascunho", Id='Draft',
                         Class="button is-success is-rounded mt-5 is-responsive block is-fullwidth")
         btn2 = h.BUTTON("Escreva seu artigo", Id="Writing",
                         Class="button is-success is-rounded mt-5 is-responsive block is-fullwidth")
-        side_tab = h.DIV((btn2, btn1), Class="column is-3")
+        btn3 = h.BUTTON("Voltar", Id="Back",
+                        Class="button is-success is-rounded mt-5 is-responsive block is-fullwidth").bind("click", back)
+        side_tab = h.DIV((btn2, btn1, btn3), Class="column is-3")
         side_tab.bind("click", self.click)
 
 
@@ -531,53 +450,6 @@ class KnowledgePage(SimplePage):
         return wrapper
 
 
-class Article(SimplePage):
-    def __init__(self, brython, menu = MENU_OPTIONS):
-        super().__init__(brython, menu, hero="main_hero")
-    def build_body(self):
-        h = self.brython.html
-        user = users[0]
-
-
-        card_img = h.FIGURE(h.IMG(src="https://bulma.io/images/placeholders/256x256.png"),
-                            Class="card-image image is-4by3")
-
-        card_content = h.DIV((
-            h.FIGURE((h.IMG(src="https://res.cloudinary.com/ameo/image/upload/v1639144778/typocat_svbspx.png")),
-                     Class="media-left image is-48x48"),
-            h.P(user["name"], Class="title is-4"),
-            h.P(user["email"], Class="subtitle is-6"),
-            h.P("Estrelas: " + user["points"]),
-            h.P(user["text"]),
-            h.P(user["tags"]),
-            h.P(user["date"])), Class="content")
-
-        card_buttons = h.DIV((
-            h.BUTTON("Comentar", Class="button is-primary"),
-            h.BUTTON("Perguntar", Class="button is-info"),
-            h.BUTTON("Artigos Filhos", Class="button")), Class="card-footer")
-
-
-
-
-
-        #comment section
-
-
-
-
-        #user comment
-        user_photo = h.FIGURE(
-            h.P((h.IMG(src="https://bulma.io/images/placeholders/128x128.png")), Class="image is-64x64"),
-            Class="media-left")
-        comment_box = h.DIV(h.TEXTAREA(placeholder = "Escreva aqui...", Class = " Focused textarea is-success has-fixed-size has-text-success-dark"), Class = "media-content field control")
-        comment_section = h.ARTICLE((user_photo, comment_box), Class="media mt-5")
-
-        card = h.DIV((card_img, card_content, card_buttons, comment_section), Class="box")
-        post = h.DIV(card, Class="column is-half is-offset-one-quarter ")
-        posts = h.DIV(post, Class="columns body-columns")
-
-        return posts
 
 class WritingPage(SimplePage):
     # Adicionando o init
@@ -619,6 +491,8 @@ class WritingPage(SimplePage):
     def build_body(self):
 
         h = self.brython.html
+        w = self.brython.window
+
         # um botão para enviar o formulário
         btn1 = h.BUTTON("Enviar", Class="button is-success is-rounded mt-5 is-responsive block is-fullwidth", type="submit")
         btn2 = h.BUTTON("Deletar", Class="button is-danger is-rounded mt-5 is-responsive block is-fullwidth", type='submit')
@@ -727,7 +601,6 @@ class Arvora:
         SimplePage.PAGES['_CADASTRO_'] = CadastroPage(br)
         SimplePage.PAGES["_PROJETO_"] = ProjectPage(br)
         SimplePage.PAGES["_CONHECIMENTO_"] = KnowledgePage(br)
-        SimplePage.PAGES["_ARTIGO_"] = Article(br)
         # SimplePage.PAGES['_PERGUNTAS_'] = QuestionsPage(br)
         SimplePage.PAGES["_RASCUNHO_"] = DraftPage(br)
         SimplePage.PAGES["_ESCREVER_"] = WritingPage(br)
